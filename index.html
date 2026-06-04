@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dynamic Enrollment Iframe</title>
+</head>
+<body>
+  <h1>El Iframe Magnifico</h1>
+  <p>Please enter your email address below to view your enrollment:</p>
+  
+  <input type="email" id="email" placeholder="Enter your email" required style="padding: 5px; width: 250px;">
+  
+  <button onclick="generateEnrollmentIframe()">Load Enrollment</button>
+
+  <p id="url-display" style="margin-top: 20px; font-size: 12px; color: #666;"></p>
+
+  <div style="position: relative; width: 100%; height: 700px; overflow: hidden; margin-top: 20px;">
+    <div style="
+        position: absolute; 
+        top: 0; 
+        left: 0; 
+        width: 100%; 
+        height: 60px; 
+        background-color: white; 
+        z-index: 10; 
+        pointer-events: none;">
+    </div>
+    
+    <iframe id="iframe-container" allow="camera; microphone" width="100%" height="700" frameborder="0" style="border: 1px solid #ccc;"></table>
+  </div>
+
+  <script>
+    function generateEnrollmentIframe() {
+      const email = document.getElementById('email').value;
+      if (!email) {
+        alert('Please enter a valid email address.');
+        return;
+      }
+
+      const key = "e4e2f04b5716148a48c1f4577c"; // Your LearnUpon Secret Key
+      const timestamp = Math.floor(Date.now() / 1000); // Current UNIX timestamp
+
+      // 1. Create the string to hash
+      const stringToHash = `USER=${email}&TS=${timestamp}&KEY=${key}`;
+
+      // 2. Generate the SHA-256 hash token securely in the browser
+      const hashBuffer = new TextEncoder().encode(stringToHash);
+      crypto.subtle.digest('SHA-256', hashBuffer).then((hash) => {
+        const token = Array.from(new Uint8Array(hash))
+          .map((b) => b.toString(16).padStart(2, '0'))
+          .join('');
+        
+        // 3. Construct the final URL with your updated redirect_uri
+        const targetRedirect = encodeURIComponent('/enrollments/322796363');
+        const url = `https://webhooksportal.learnupon.com/sqsso?Email=${email}&TS=${timestamp}&SSOToken=${token}&redirect_uri=${targetRedirect}`;
+        
+        // 4. Update the text display and inject the URL into the iframe
+        document.getElementById('url-display').innerText = `Generated URL: ${url}`;
+        document.getElementById('iframe-container').src = url;
+      });
+    }
+  </script>
+</body>
+</html>
