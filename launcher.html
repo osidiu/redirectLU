@@ -46,8 +46,7 @@
         // Show the text link on the current page for reference
         document.getElementById('url-display').innerText = `Redirecting to: ${url}`;
         
-        // 2. REQUIREMENT MET: Redirect in the SAME tab/window to preserve document.referrer
-        // Avoids intermediate redirects and keeps target="_blank" away.
+        // Redirect in the SAME tab/window to preserve document.referrer
         window.location.href = url;
       });
     }
