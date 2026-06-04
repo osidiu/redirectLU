@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  
+  <title>LearnUpon SQSSO Launcher</title>
+</head>
+<body>
+  <h1>El URLo Magnifico</h1>
+  <p>Please enter your email address below to access your enrollment:</p>
+  
+  <input type="email" id="email" placeholder="Enter your email" required style="padding: 5px; width: 250px;">
+  
+  <button onclick="launchEnrollment()">Launch Enrollment</button>
+
+  <p id="url-display" style="margin-top: 20px; font-size: 12px; color: #666;"></p>
+
+  <script>
+    function launchEnrollment() {
+      const email = document.getElementById('email').value;
+      if (!email) {
+        alert('Please enter a valid email address.');
+        return;
+      }
+
+      const key = "e4e2f04b5716148a48c1f4577c"; // Your LearnUpon Secret Key
+      const timestamp = Math.floor(Date.now() / 1000); // Current UNIX timestamp
+
+      // Create the string to hash
+      const stringToHash = `USER=${email}&TS=${timestamp}&KEY=${key}`;
+
+      // Generate the SHA-256 hash token securely in the browser
+      const hashBuffer = new TextEncoder().encode(stringToHash);
+      crypto.subtle.digest('SHA-256', hashBuffer).then((hash) => {
+        const token = Array.from(new Uint8Array(hash))
+          .map((b) => b.toString(16).padStart(2, '0'))
+          .join('');
+        
+        // Construct the final URL with your updated redirect_uri
+        const targetRedirect = encodeURIComponent('/enrollments/322796363');
+        const url = `https://webhooksportal.learnupon.com/sqsso?Email=${email}&TS=${timestamp}&SSOToken=${token}&redirect_uri=${targetRedirect}`;
+        
+        // Show the text link on the current page for reference
+        document.getElementById('url-display').innerText = `Redirecting to: ${url}`;
+        
+        // 2. REQUIREMENT MET: Redirect in the SAME tab/window to preserve document.referrer
+        // Avoids intermediate redirects and keeps target="_blank" away.
+        window.location.href = url;
+      });
+    }
+  </script>
+</body>
+</html>
